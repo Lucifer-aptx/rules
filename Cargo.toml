@@ -1,0 +1,10 @@
+[package]
+name = "rules"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 随机数
+rand="0.8.5"
+# 引擎
+bevy="0.11.2"
