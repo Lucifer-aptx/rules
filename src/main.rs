@@ -14,7 +14,7 @@ const MAP_SIZE: (f32, f32) = (1000., 1000.);
 // 地图半径
 static MAP_HALF_SIZE: (f32, f32) = (MAP_SIZE.0 / 2., MAP_SIZE.1 / 2.);
 // 视图位置移动速度大小
-const MOVE_SPEED: f32 = 2.4;
+const MOVE_SPEED: f32 = 1.5;
 
 fn main() {
     App::new()
@@ -22,7 +22,7 @@ fn main() {
         .add_systems(Startup, (init_window, draw_grid, draw_people))
         .add_systems(
             Update,
-            (click_with_color, move_camera, move_people, move_people_stop),
+            (move_camera, move_people, move_people_stop),
         )
         .run();
 }
@@ -87,40 +87,7 @@ fn spawn_sprite(commands: &mut Commands, x: f32, y: f32) {
         .insert(Cache);
 }
 
-fn click_with_color(
-    mut cache_block: Query<(&mut Sprite, &Transform), With<Cache>>,
-    buttons: Res<Input<MouseButton>>,
-    windows: Query<&mut Window>,
-    camera: Query<(&mut Camera, &GlobalTransform), With<MainCamera>>,
-) {
-    if buttons.pressed(MouseButton::Left) {
-        let (camera_single, camera_transform) = camera.single();
-        let window = windows.single();
 
-        if let Some(world_position) = window
-            .cursor_position()
-            .and_then(|cursor| camera_single.viewport_to_world(camera_transform, cursor))
-            .map(|ray| ray.origin.truncate())
-        {
-            let (cursor_x, cursor_y) = (world_position.x, world_position.y);
-            for (mut block, block_transform) in cache_block.iter_mut() {
-                let (block_x, block_y) =
-                    (block_transform.translation.x, block_transform.translation.y);
-                let (block_width_half, block_height_half) = (
-                    block.custom_size.unwrap().x / 2.,
-                    block.custom_size.unwrap().y / 2.,
-                );
-                let is_this_block = cursor_x >= block_x - block_width_half - BLOCK_BOARD_SIZE
-                    && cursor_x <= block_x + block_width_half + BLOCK_BOARD_SIZE
-                    && cursor_y >= block_y - block_height_half - BLOCK_BOARD_SIZE
-                    && cursor_y <= block_y + block_height_half + BLOCK_BOARD_SIZE;
-                if is_this_block {
-                    block.color = Color::PURPLE;
-                }
-            }
-        }
-    }
-}
 #[derive(Component)]
 struct Cache;
 
@@ -199,13 +166,17 @@ fn draw_people(
 
 fn move_people(
     buttons: Res<Input<KeyCode>>,
-    mut people: Query<&mut Transform, With<People>>,
+    buttons_mouse: Res<Input<MouseButton>>,
+    mut people: Query<&mut Transform, (With<People>, Without<Cache>)>,
+    mut cache_block: Query<(&mut Sprite, &Transform), With<Cache>>,
     time: Res<Time>,
     animate_info: Query<(
         &AnimationIndices,
         &mut AnimationTimer,
         &mut TextureAtlasSprite,
     )>,
+    windows: Query<&mut Window>,
+    camera: Query<(&mut Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let (x, y) = (people.single().translation.x, people.single().translation.y);
     let mut people_single = people.single_mut();
@@ -234,6 +205,50 @@ fn move_people(
     }
     if people_single.translation.y < -MAP_HALF_SIZE.1 + BLOCK_SIZE + 12.{
         people_single.translation.y = -MAP_HALF_SIZE.1 + BLOCK_SIZE + 12.;
+    }
+
+    if buttons_mouse.pressed(MouseButton::Left) {
+        let (camera_single, camera_transform) = camera.single();
+        let window = windows.single();
+
+        if let Some(world_position) = window
+            .cursor_position()
+            .and_then(|cursor| camera_single.viewport_to_world(camera_transform, cursor))
+            .map(|ray| ray.origin.truncate())
+        {
+            let (cursor_x, cursor_y) = (world_position.x, world_position.y);
+            for (mut block, block_transform) in cache_block.iter_mut() {
+                let (block_x, block_y) =
+                    (block_transform.translation.x, block_transform.translation.y);
+                let (block_width_half, block_height_half) = (
+                    block.custom_size.unwrap().x / 2.,
+                    block.custom_size.unwrap().y / 2.,
+                );
+                let is_this_block = cursor_x >= block_x - block_width_half - BLOCK_BOARD_SIZE
+                    && cursor_x <= block_x + block_width_half + BLOCK_BOARD_SIZE
+                    && cursor_y >= block_y - block_height_half - BLOCK_BOARD_SIZE
+                    && cursor_y <= block_y + block_height_half + BLOCK_BOARD_SIZE;
+                if is_this_block {
+                    block.color = Color::PURPLE;
+                }
+            }
+        }
+    }
+    let (people_x, people_y) = (people.single().translation.x, people.single().translation.y);
+    for (mut block, block_transform) in cache_block.iter_mut() {
+        let (block_x, block_y) =
+            (block_transform.translation.x, block_transform.translation.y);
+        let (block_width_half, block_height_half) = (
+            block.custom_size.unwrap().x / 2.,
+            block.custom_size.unwrap().y / 2.,
+        );
+        let is_this_block = people_x >= block_x - block_width_half - BLOCK_BOARD_SIZE - 12.
+            && people_x <= block_x + block_width_half + BLOCK_BOARD_SIZE + 12.
+            && people_y >= block_y - block_height_half - BLOCK_BOARD_SIZE - 12.
+            && people_y <= block_y + block_height_half + BLOCK_BOARD_SIZE + 12.;
+        if is_this_block && block.color == Color::PURPLE {
+            block.color = Color::BLUE;
+        }
     }
 }
 
