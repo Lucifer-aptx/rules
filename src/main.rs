@@ -6,7 +6,7 @@ const BLOCK_SIZE: f32 = 15.;
 // 格子边框大小
 const BLOCK_BOARD_SIZE: f32 = 0.5;
 // 格子半径
-static BLOCK_RADIU: f32 = BLOCK_SIZE / 2.;
+static BLOCK_RADIUS: f32 = BLOCK_SIZE / 2.;
 // 格子内部大小
 static CACHE_SIZE: f32 = BLOCK_SIZE - BLOCK_BOARD_SIZE;
 // 地图大小
@@ -34,7 +34,7 @@ fn init_window(mut commands: Commands) -> () {
 
 fn draw_grid(mut commands: Commands) {
     let (width_half, height_half) = MAP_HALF_SIZE;
-    let (mut x, mut y) = (BLOCK_RADIU, BLOCK_RADIU);
+    let (mut x, mut y) = (BLOCK_RADIUS, BLOCK_RADIUS);
 
     while x + BLOCK_SIZE <= width_half {
         x += BLOCK_SIZE;
@@ -203,8 +203,8 @@ fn move_people(
     if people_single.translation.y > MAP_HALF_SIZE.1 - BLOCK_SIZE - 12.{
         people_single.translation.y = MAP_HALF_SIZE.1 - BLOCK_SIZE - 12.;
     }
-    if people_single.translation.y < -MAP_HALF_SIZE.1 + BLOCK_SIZE + 12.{
-        people_single.translation.y = -MAP_HALF_SIZE.1 + BLOCK_SIZE + 12.;
+    if people_single.translation.y < -MAP_HALF_SIZE.1 + BLOCK_SIZE + 16.{
+        people_single.translation.y = -MAP_HALF_SIZE.1 + BLOCK_SIZE + 16.;
     }
 
     if buttons_mouse.pressed(MouseButton::Left) {
