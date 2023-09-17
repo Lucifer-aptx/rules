@@ -5,6 +5,7 @@ use crate::systems::*;
 pub mod components;
 pub mod constants;
 pub mod systems;
+pub mod plugins;
 
 fn main() {
     App::new()
