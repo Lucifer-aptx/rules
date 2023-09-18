@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::DefaultPlugins;
+use bevy::prelude::App;
 use crate::plugins::cameras::CamerasPlugin;
 use crate::plugins::physics::PhysicsPlugin;
 
