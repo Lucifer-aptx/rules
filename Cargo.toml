@@ -12,3 +12,7 @@ bevy="0.11.2"
 bevy_rapier2d = "0.22.0"
 # 地图
 bevy_ecs_tilemap = "0.11.0"
+# 按键映射
+leafwing-input-manager = "0.10.0"
+# 资源加载
+bevy_asset_loader = "0.17.0"
